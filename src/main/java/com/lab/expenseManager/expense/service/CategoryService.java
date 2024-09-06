@@ -1,35 +1,20 @@
 package com.lab.expenseManager.expense.service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import com.lab.expenseManager.expense.domain.Category;
 import com.lab.expenseManager.expense.dto.CategoryDto;
-import com.lab.expenseManager.expense.dto.RetrieveUserExpensesDto;
 import com.lab.expenseManager.expense.repository.CategoryRepository;
 
 @Service
 public class CategoryService {
 
 	private final CategoryRepository categoryRepository;
-	private final ExpenseService expenseService;
 
-	public CategoryService(CategoryRepository categoryRepository, ExpenseService expenseService) {
+	public CategoryService(CategoryRepository categoryRepository) {
 		this.categoryRepository = categoryRepository;
-		this.expenseService = expenseService;
-	}
-
-	public List<Category> getAll() {
-		return categoryRepository.findAll();
-	}
-
-	public List<Category> retriveExpensesCategories() throws Exception {
-		
-		List<RetrieveUserExpensesDto> expenses = expenseService.getUserExpenses();
-		
-		return expenses.stream().map(RetrieveUserExpensesDto::category).distinct().collect(Collectors.toList());
 	}
 
 	public List<Category> findAll(String email) throws Exception {

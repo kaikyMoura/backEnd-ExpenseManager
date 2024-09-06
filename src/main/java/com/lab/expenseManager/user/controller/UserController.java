@@ -21,6 +21,7 @@ import com.lab.expenseManager.user.domain.User;
 import com.lab.expenseManager.user.dto.CreateUserDto;
 import com.lab.expenseManager.user.dto.LoginUserDto;
 import com.lab.expenseManager.user.dto.RecoveryJwtTokenDto;
+import com.lab.expenseManager.user.dto.RecoveryUserDto;
 import com.lab.expenseManager.user.service.UserService;
 
 @RestController
@@ -28,67 +29,73 @@ import com.lab.expenseManager.user.service.UserService;
 @RequestMapping(value = "/users")
 public class UserController {
 
-    private final UserService userService;
+	private final UserService userService;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
+	public UserController(UserService userService) {
+		this.userService = userService;
+	}
 
-    @PostMapping("/login")
-    public ResponseEntity<ResponseWithDataModel> authenticateUser(@RequestBody LoginUserDto loginUserDto) {
-        try {
-            RecoveryJwtTokenDto token = userService.authenticateUser(loginUserDto);
-            return new ResponseEntity<>(new ResponseWithDataModel(201, "Operação realizada com sucesso.", token), HttpStatus.OK);
-        }
-        catch (Exception exception) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
+	@PostMapping("/login")
+	public ResponseEntity<ResponseWithDataModel> authenticateUser(@RequestBody LoginUserDto loginUserDto) {
+		try {
+			RecoveryJwtTokenDto token = userService.authenticateUser(loginUserDto);
+			return new ResponseEntity<>(new ResponseWithDataModel(200, "Operação realizada com sucesso.", token),
+					HttpStatus.OK);
+		} catch (Exception exception) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 
-    @PostMapping
-    public ResponseEntity<ResponseModel> createUser(@RequestBody CreateUserDto user) {
-        try {
-            userService.create(user);
-            return new ResponseEntity<>(new ResponseModel(201, "Operação realizada com sucesso."), HttpStatus.CREATED);
-        }
-        catch (Exception exception) {
-            return new ResponseEntity<>(new ResponseModel(500, "Erro interno no servidor."), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        }
+	@PostMapping
+	public ResponseEntity<ResponseModel> createUser(@RequestBody CreateUserDto user) {
+		try {
+			userService.create(user);
+			return new ResponseEntity<>(new ResponseModel(201, "Operação realizada com sucesso."), HttpStatus.CREATED);
+		} catch (Exception exception) {
+			return new ResponseEntity<>(new ResponseModel(500, "Erro interno no servidor."),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 
-    @GetMapping("/customer")
-    public ResponseEntity<String> getCustomerAuthenticationTest() {
-        return new ResponseEntity<>("Cliente autenticado com sucesso", HttpStatus.OK);
-    }
-    
-//    @GetMapping("/auth/")
-//    public ResponseEntity<RecoveryUserDto> getUser(@Param(value = "email") String email) {
-//    	return ResponseEntity.ok().body(userService.getUser(email));
-//    }    
-    
-    //Apenas usuários com o role "ADMINISTRATOR" poderão acessar esses endpoints
-    @GetMapping("/administrator")
-    @PreAuthorize("hasRole('ADMINISTRATOR')")
-    public ResponseEntity<String> getAdminAuthenticationTest() {
-        return new ResponseEntity<>("Administrador autenticado com sucesso", HttpStatus.OK);
-    }
-    
-    @DeleteMapping("/administrator/delete/{id}")
-    @PreAuthorize("hasRole('ADMINISTRATOR')")
-    public ResponseEntity<String> deleteUser(@PathVariable String id) throws Exception {
-    	try {
-    	UUID uuid = UUID.fromString(id);
-    	userService.deleteById(uuid);
-        return new ResponseEntity<>("Usuário deletado com sucesso!", HttpStatus.ACCEPTED);
-    	}
-    	catch (Exception e) {
+	@GetMapping("/customer")
+	public ResponseEntity<String> getCustomerAuthenticationTest() {
+		return new ResponseEntity<>("Cliente autenticado com sucesso", HttpStatus.OK);
+	}
+
+	@GetMapping("/auth/user")
+	public ResponseEntity<ResponseWithDataModel> getUser() {
+		try {
+			User user = userService.getUser();
+			return new ResponseEntity<>(new ResponseWithDataModel(200, "Operação realizada com sucesso.",
+					new RecoveryUserDto(user.getName(), user.getLastName(), user.getEmail(), user.getUserImage())),
+					HttpStatus.OK);
+		} catch (Exception exception) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	// Apenas usuários com o role "ADMINISTRATOR" poderão acessar esses endpoints
+	@GetMapping("/administrator")
+	@PreAuthorize("hasRole('ADMINISTRATOR')")
+	public ResponseEntity<String> getAdminAuthenticationTest() {
+		return new ResponseEntity<>("Administrador autenticado com sucesso", HttpStatus.OK);
+	}
+
+	@DeleteMapping("/administrator/delete/{id}")
+	@PreAuthorize("hasRole('ADMINISTRATOR')")
+	public ResponseEntity<String> deleteUser(@PathVariable String id) throws Exception {
+		try {
+			UUID uuid = UUID.fromString(id);
+			userService.deleteById(uuid);
+			return new ResponseEntity<>("Usuário deletado com sucesso!", HttpStatus.ACCEPTED);
+		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 		}
-    }
+	}
 
-    @GetMapping(value = "/administrator/list")
-    @PreAuthorize("hasRole('ADMINISTRATOR')")
-    public ResponseEntity<List<User>> findAll() {
-        return ResponseEntity.ok().body(userService.getAll());
-    }
+	@GetMapping(value = "/administrator/list")
+	@PreAuthorize("hasRole('ADMINISTRATOR')")
+	public ResponseEntity<List<User>> findAll() {
+		return ResponseEntity.ok().body(userService.getAll());
+	}
 }

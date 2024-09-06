@@ -38,6 +38,7 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
         try {
         			//Verifica se o endpoint não é público. Se a resposta for "true", então será gerado o token de acesso
         	        if (checkIfEndpointIsNotPublic(request)) {
+
         	            String token = recoveryToken(request);
         	            
         	            if (token != null) {
@@ -74,14 +75,14 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
         	        response.sendError(HttpServletResponse.SC_FORBIDDEN, ade.getMessage());
         	    } catch (Exception e) {
         	        e.printStackTrace();
-        	        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Erro interno do servidor");
+        	        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Erro interno do servidor: " + e.getMessage());
         	    }
     }
 
     private String recoveryToken(HttpServletRequest request) {
         String authorizationHeader = request.getHeader("Authorization");
-        if (authorizationHeader != null) {
-            return authorizationHeader.replace("Bearer ", "");
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            return authorizationHeader.substring(7);
         }
         return null;
     }

@@ -13,5 +13,5 @@ import com.lab.expenseManager.expense.dto.RetrieveUserExpensesDto;
 
 @Repository
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
-	List<RetrieveUserExpensesDto> findByUserId(@Param(value = "user_id") UUID user_id);
+	List<Expense> findByUserId(@Param("user_id") UUID user_id);
 }

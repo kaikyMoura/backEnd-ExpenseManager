@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -112,8 +114,12 @@ public class UserService {
 		return userRepository.findByEmail(email).get().getId();
 	}
 
-	public User getUser(String email) {
-		return userRepository.findByEmail(email).get();
+	public User getUser() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+		
+		return userRepository.findByEmail(userDetails.getEmail()).get();
 	}
 
 	public List<User> getAll() {

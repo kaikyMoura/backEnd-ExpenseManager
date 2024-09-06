@@ -2,6 +2,7 @@ package com.lab.expenseManager.expense.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +15,7 @@ import com.lab.expenseManager.model.ResponseModel;
 import com.lab.expenseManager.model.ResponseWithDataModel;
 
 @RestController
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping(value = "/expense")
 public class ExpenseController {
 
