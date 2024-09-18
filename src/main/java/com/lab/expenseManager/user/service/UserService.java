@@ -67,6 +67,10 @@ public class UserService {
 			throw new RuntimeException("Erro ao autenticar o usuário", exception);
 		}
 	}
+	
+	public void validateUser(String token) {
+		jwtTokenService.getSubjectFromToken(token);
+	}
 
 	public void create(CreateUserDto createUserDto) {
 		try {

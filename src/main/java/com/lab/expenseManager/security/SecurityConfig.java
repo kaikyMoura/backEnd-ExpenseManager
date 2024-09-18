@@ -1,5 +1,9 @@
 package com.lab.expenseManager.security;
 
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,9 +15,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 import com.lab.expenseManager.user.filters.UserAuthenticationFilter;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
@@ -28,8 +35,8 @@ public class SecurityConfig {
 
 	public static final String[] ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED = { "/users/login", "/users" };
 
-	public static final String[] ENDPOINTS_WITH_AUTHENTICATION_REQUIRED = { "/users/auth/user", "/expense/list",
-			"/category/**" };
+	public static final String[] ENDPOINTS_WITH_AUTHENTICATION_REQUIRED = { "/users/auth/**", "/expense/list",
+			"/expense/**", "/category/**" };
 
 	/* public static final String [] ENDPOINTS_CUSTOMER = {"/users/customer"}; */
 
@@ -38,18 +45,27 @@ public class SecurityConfig {
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-		return httpSecurity.exceptionHandling(exh -> exh.authenticationEntryPoint(
-				(request, response, ex) -> {
-					response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
-				}
-		  )).csrf(csrf -> csrf.disable())
-			.headers((headers) -> headers.frameOptions((frameOptions) -> frameOptions.sameOrigin()))
-			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-			.authorizeHttpRequests(auth -> auth.requestMatchers(ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED)
-					.permitAll().requestMatchers(ENDPOINTS_WITH_AUTHENTICATION_REQUIRED).authenticated()
-					.requestMatchers(ENDPOINTS_ADMIN).hasRole("ADMINISTRATOR").anyRequest().denyAll())
-			.addFilterBefore(userAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-			.build();
+		return httpSecurity.exceptionHandling(exh -> exh.authenticationEntryPoint((request, response, ex) -> {
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
+		})).cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
+
+			@Override
+			public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+				CorsConfiguration corsConfiguration = new CorsConfiguration();
+				corsConfiguration.setAllowCredentials(true);
+				corsConfiguration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+				corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+				corsConfiguration.setAllowedHeaders(List.of("*"));
+				corsConfiguration.setMaxAge(Duration.ofMinutes(5L));
+				return corsConfiguration;
+			}
+		})).csrf(csrf -> csrf.disable())
+				.headers((headers) -> headers.frameOptions((frameOptions) -> frameOptions.sameOrigin()))
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.authorizeHttpRequests(auth -> auth.requestMatchers(ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED)
+						.permitAll().requestMatchers(ENDPOINTS_WITH_AUTHENTICATION_REQUIRED).authenticated()
+						.requestMatchers(ENDPOINTS_ADMIN).hasRole("ADMINISTRATOR").anyRequest().denyAll())
+				.addFilterBefore(userAuthenticationFilter, UsernamePasswordAuthenticationFilter.class).build();
 	}
 
 	@Bean
@@ -62,15 +78,4 @@ public class SecurityConfig {
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
-
-//	@Bean
-//	public CorsConfigurationSource corsConfigurationSource() {
-//		CorsConfiguration configuration = new CorsConfiguration();
-//		configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
-//		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-//		configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
-//		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//		source.registerCorsConfiguration("/**", configuration);
-//		return source;
-//	}
 }

@@ -19,6 +19,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 import io.micrometer.common.lang.Nullable;
@@ -30,9 +31,11 @@ import io.micrometer.common.lang.Nullable;
 @NoArgsConstructor
 @Entity
 @Table(name = "tbusers")
-public class User {
+public class User implements Serializable{
 
-    @Id
+	private static final long serialVersionUID = 3432009339652921717L;
+
+	@Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 

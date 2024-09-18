@@ -1,11 +1,12 @@
 package com.lab.expenseManager.expense.domain;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import org.hibernate.Hibernate;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lab.expenseManager.expense.enums.Priority;
@@ -13,6 +14,7 @@ import com.lab.expenseManager.user.domain.User;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -38,53 +40,59 @@ import lombok.ToString;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter @Setter
+@Getter
+@Setter
 @Table(name = "tb_expenses")
-public class Expense {
+public class Expense implements Serializable {
 	
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Long id;
+	private static final long serialVersionUID = 1L;
 
-    @Max(value = 150)
-    private String name;
+	@Id
+	@GeneratedValue(strategy = GenerationType.UUID)
+	private UUID id;
 
-    @Max(value = 1000)
-    private String description;
+	@Max(value = 150)
+	private String name;
 
-    private Double amount;
-    
-    @Nullable
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "category_id")
-    private Category category;
+	@Max(value = 1000)
+	private String description;
 
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd/MM/yyyy")
-    private Date date;
-    
-    private String currency;
-    
-    private Boolean isRecurring;
+	private Double amount;
 
-    private ArrayList<String> attachments;
-    
-    @Enumerated(EnumType.STRING)
-    private Priority priority;
-    
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id")
-    private User user;
-    
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        Expense product = (Expense) o;
-        return id != null && Objects.equals(id, product.id);
-    }
+	@Nullable
+	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JoinColumn(name = "category_id")
+	private Category category;
 
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+	private Date date;
+
+	private String currency;
+
+	private Boolean isRecurring;
+
+	@ElementCollection
+	private List<String> attachments;
+
+	@Enumerated(EnumType.STRING)
+	private Priority priority;
+
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "user_id", referencedColumnName = "id")
+	private User user;
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o))
+			return false;
+		Expense product = (Expense) o;
+		return id != null && Objects.equals(id, product.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return getClass().hashCode();
+	}
 }

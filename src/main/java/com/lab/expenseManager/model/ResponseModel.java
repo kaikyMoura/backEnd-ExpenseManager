@@ -1,7 +1,4 @@
 package com.lab.expenseManager.model;
 
-public record ResponseModel (
-		int statusCode,
-		String message
-	        ){}
-
+public record ResponseModel(int statusCode, String message) {
+}

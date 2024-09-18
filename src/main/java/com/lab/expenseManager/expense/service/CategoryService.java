@@ -17,16 +17,22 @@ public class CategoryService {
 		this.categoryRepository = categoryRepository;
 	}
 
-	public List<Category> findAll(String email) throws Exception {
+	public List<Category> findAll() throws Exception {
 		return categoryRepository.findAll();
 	}
 
-	public void create(CategoryDto categoryDto) { 
+	public void create(CategoryDto categoryDto) {
 		try {
 			categoryRepository.save(Category.builder().name(categoryDto.name()).build());
 		} catch (Exception e) {
 			throw new RuntimeException("Erro ao executar a operação", e.getCause());
 		}
+	}
+
+	public Category findOrCreateCategoryByName(String name) {
+		return categoryRepository.findByName(name).orElseGet(() -> {
+			return categoryRepository.save(Category.builder().name(name).build());
+		});
 	}
 
 	public void deleteById(Long id) {

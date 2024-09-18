@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -57,9 +58,11 @@ public class UserController {
 		}
 	}
 
-	@GetMapping("/customer")
-	public ResponseEntity<String> getCustomerAuthenticationTest() {
-		return new ResponseEntity<>("Cliente autenticado com sucesso", HttpStatus.OK);
+	@GetMapping
+	public ResponseEntity<ResponseModel> checkAuthentication(@RequestHeader("Authorization") String token) {
+		String jwtToken = token.substring(7);
+		userService.validateUser(jwtToken);
+		return new ResponseEntity<>(new ResponseModel(200, "O usuário está autenticado."), HttpStatus.OK);
 	}
 
 	@GetMapping("/auth/user")

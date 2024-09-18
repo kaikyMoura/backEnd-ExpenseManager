@@ -1,20 +1,20 @@
 package com.lab.expenseManager.expense.dto;
 
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 import com.lab.expenseManager.expense.domain.Category;
 import com.lab.expenseManager.expense.enums.Priority;
 
 public record RetrieveUserExpensesDto(
-		Long id,
+		UUID id,
 		String name,
 		String description,
 	    Double amount,
-	    Date date,
+	    String date,
 	    Category category,
 	    String currency,
 	    Boolean isRecurring,
-	    ArrayList<String> attachments,
+	    List<String> attachments,
 	    Priority priority
 		) {}
