@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.lab.expenseManager.security.JwtTokenService;
 import com.lab.expenseManager.security.SecurityConfig;
 import com.lab.expenseManager.user.dataAcess.UserDetailsImpl;
@@ -35,6 +36,8 @@ public class UserService {
 	private final JwtTokenService jwtTokenService;
 
 	private final SecurityConfig securityConfig;
+
+	//private final EmailService emailService;
 
 	public UserService(IUserRepository userRepositoy, IRoleRepository roleRepository, JwtTokenService jwtTokenService,
 			SecurityConfig securityConfig, UserDetailsServiceImpl userServiceImpl) {
@@ -67,9 +70,22 @@ public class UserService {
 			throw new RuntimeException("Erro ao autenticar o usuário", exception);
 		}
 	}
-	
-	public void validateUser(String token) {
-		jwtTokenService.getSubjectFromToken(token);
+
+	public RecoveryJwtTokenDto generateNewToken(String token) {
+		try {
+			String email = jwtTokenService.getSubjectFromToken(token);
+			if (jwtTokenService.isTokenNearExpiration(token)) {
+
+				UserDetailsImpl user = userServiceImpl.loadUserByUsername(email);
+
+				String newToken = jwtTokenService.generateToken(user);
+				return new RecoveryJwtTokenDto(newToken);
+			} else {
+				throw new JWTVerificationException("Token ainda válido, nenhuma renovação necessária.");
+			}
+		} catch (JWTVerificationException ex) {
+			throw new JWTVerificationException("Token inválido ou expirado.");
+		}
 	}
 
 	public void create(CreateUserDto createUserDto) {
@@ -86,8 +102,9 @@ public class UserService {
 					.password(securityConfig.passwordEncoder().encode(createUserDto.password()))
 					.role(Role.builder().name(RoleName.valueOf(requestRole)).id(role.getId()).build()).build());
 
-			// emailService.enviarEmail(createUserDto.email());
+			//emailService.verifyAccountEmail(createUserDto.email());
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new RuntimeException("Erro ao executar a operação", e.getCause());
 		}
 	}
@@ -122,7 +139,7 @@ public class UserService {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
 		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-		
+
 		return userRepository.findByEmail(userDetails.getEmail()).get();
 	}
 

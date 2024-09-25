@@ -58,11 +58,13 @@ public class UserController {
 		}
 	}
 
-	@GetMapping
-	public ResponseEntity<ResponseModel> checkAuthentication(@RequestHeader("Authorization") String token) {
+	
+	
+	@GetMapping("/validate-token")
+	public ResponseEntity<ResponseWithDataModel> genetaNewToken(@RequestHeader("Authorization") String token) {
 		String jwtToken = token.substring(7);
-		userService.validateUser(jwtToken);
-		return new ResponseEntity<>(new ResponseModel(200, "O usuário está autenticado."), HttpStatus.OK);
+		return new ResponseEntity<>(new ResponseWithDataModel(200, "Token renovado com sucesso.", userService.generateNewToken(jwtToken)), HttpStatus.OK);
+	
 	}
 
 	@GetMapping("/auth/user")

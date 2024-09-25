@@ -33,7 +33,7 @@ public class SecurityConfig {
 		this.userAuthenticationFilter = userAuthenticationFilter;
 	}
 
-	public static final String[] ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED = { "/users/login", "/users" };
+	public static final String[] ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED = { "/users/login", "/users", "/users/validate-token" };
 
 	public static final String[] ENDPOINTS_WITH_AUTHENTICATION_REQUIRED = { "/users/auth/**", "/expense/list",
 			"/expense/**", "/category/**" };

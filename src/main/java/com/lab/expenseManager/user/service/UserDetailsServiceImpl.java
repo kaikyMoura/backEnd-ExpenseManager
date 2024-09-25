@@ -1,6 +1,5 @@
 package com.lab.expenseManager.user.service;
 
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -18,7 +17,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return new UserDetailsImpl(userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Usuário não encontrado")));
+    public UserDetailsImpl loadUserByUsername(String email) throws UsernameNotFoundException {
+        return new UserDetailsImpl(userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("Nenhum usuário foi encontrado contendo este email.")));
     }
 }
