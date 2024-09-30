@@ -19,7 +19,7 @@ public class EmailService {
 
 	void verifyAccountEmail(String toEmail, String token) throws IOException {
 		Dotenv dotenv = Dotenv.load();
-		String verificationLink = "http://localhost:3000/VerifyAccount/accountVerify?token=" + token;
+		String verificationLink = "https://expense-manager-mocha.vercel.app/VerifyAccount/accountVerify?token=" + token;
 		Email from = new Email("kaikymoura972@gmail.com");
 		String htmlContent = "<h1>Olá!</h1>" + "<p>Por favor, clique no link abaixo para verificar sua conta:</p>"
 				+ "<a href='" + verificationLink + "'>Clique aqui</a>";
