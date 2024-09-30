@@ -53,7 +53,7 @@ public class SecurityConfig {
 			public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 				CorsConfiguration corsConfiguration = new CorsConfiguration();
 				corsConfiguration.setAllowCredentials(true);
-				corsConfiguration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+				corsConfiguration.setAllowedOrigins(Arrays.asList("https://expense-manager-mocha.vercel.app"));
 				corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 				corsConfiguration.setAllowedHeaders(List.of("*"));
 				corsConfiguration.setMaxAge(Duration.ofMinutes(5L));
