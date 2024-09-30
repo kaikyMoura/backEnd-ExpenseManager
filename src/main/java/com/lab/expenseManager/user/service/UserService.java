@@ -21,6 +21,7 @@ import com.lab.expenseManager.user.dto.LoginUserDto;
 import com.lab.expenseManager.user.dto.RecoveryJwtTokenDto;
 import com.lab.expenseManager.user.dto.UpdateUserDto;
 import com.lab.expenseManager.user.enums.RoleName;
+import com.lab.expenseManager.user.enums.Status;
 import com.lab.expenseManager.user.repository.IRoleRepository;
 import com.lab.expenseManager.user.repository.IUserRepository;
 
@@ -37,15 +38,16 @@ public class UserService {
 
 	private final SecurityConfig securityConfig;
 
-	//private final EmailService emailService;
+	private final EmailService emailService;
 
 	public UserService(IUserRepository userRepositoy, IRoleRepository roleRepository, JwtTokenService jwtTokenService,
-			SecurityConfig securityConfig, UserDetailsServiceImpl userServiceImpl) {
+			SecurityConfig securityConfig, UserDetailsServiceImpl userServiceImpl, EmailService emailService) {
 		this.userRepository = userRepositoy;
 		this.roleRepository = roleRepository;
 		this.userServiceImpl = userServiceImpl;
 		this.jwtTokenService = jwtTokenService;
 		this.securityConfig = securityConfig;
+		this.emailService = emailService;
 	}
 
 	public RecoveryJwtTokenDto authenticateUser(LoginUserDto loginUserDto) {
@@ -88,6 +90,21 @@ public class UserService {
 		}
 	}
 
+	public RecoveryJwtTokenDto activateAccount(String token) {
+		String email = jwtTokenService.getSubjectFromToken(token);
+		UserDetailsImpl user = userServiceImpl.loadUserByUsername(email);
+
+		User u = user.getUser();
+
+		u.setStatus(Status.ACTIVE);
+
+		this.update(u.getId(),
+				new UpdateUserDto(u.getName(), u.getLastName(), u.getEmail(), u.getUserImage(), u.getStatus()));
+
+		String newToken = jwtTokenService.generateToken(user);
+		return new RecoveryJwtTokenDto(newToken);
+	}
+
 	public void create(CreateUserDto createUserDto) {
 		try {
 			// Se no corpo da requisição não for passado um role especifico, como padrão ele
@@ -96,13 +113,14 @@ public class UserService {
 
 			Role role = roleRepository.findByName(RoleName.valueOf(requestRole));
 
-			// Por questão de modelagem eu preferi gerar um UUID aleatorio
-			userRepository.save(User.builder().id(UUID.randomUUID()).name(createUserDto.name())
+			User user = userRepository.save(User.builder().id(UUID.randomUUID()).name(createUserDto.name())
 					.lastName(createUserDto.lastName()).email(createUserDto.email())
 					.password(securityConfig.passwordEncoder().encode(createUserDto.password()))
-					.role(Role.builder().name(RoleName.valueOf(requestRole)).id(role.getId()).build()).build());
+					.role(Role.builder().name(RoleName.valueOf(requestRole)).id(role.getId()).build())
+					.status(Status.INACTIVE).build());
 
-			//emailService.verifyAccountEmail(createUserDto.email());
+			String token = jwtTokenService.generateToken(new UserDetailsImpl(user));
+			emailService.verifyAccountEmail(createUserDto.email(), token);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException("Erro ao executar a operação", e.getCause());
@@ -119,10 +137,15 @@ public class UserService {
 
 	public void update(UUID uuid, UpdateUserDto updateUserDto) {
 		try {
-			userServiceImpl.loadUserByUsername(updateUserDto.email());
+			User existingUser = userServiceImpl.loadUserByUsername(updateUserDto.email()).getUser();
 
-			userRepository.save(User.builder().name(updateUserDto.name()).lastName(updateUserDto.lastName())
-					.email(updateUserDto.email()).userImage(updateUserDto.userImage()).build());
+			existingUser.setName(updateUserDto.name());
+			existingUser.setLastName(updateUserDto.lastName());
+			existingUser.setEmail(updateUserDto.email());
+			existingUser.setUserImage(updateUserDto.userImage());
+			existingUser.setStatus(updateUserDto.status());
+
+			userRepository.save(existingUser);
 
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -95,6 +95,8 @@ public class ExpenseService {
 					.attachments(expenseDto.attachments())
 					.priority(expenseDto.priority())
 					.date(expenseDto.date()).user(userService.getUser()).build());
+			
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException("Erro ao executar a operação");

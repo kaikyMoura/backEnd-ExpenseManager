@@ -3,6 +3,8 @@ package com.lab.expenseManager.user.domain;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,6 +23,8 @@ import lombok.ToString;
 
 import java.io.Serializable;
 import java.util.UUID;
+
+import com.lab.expenseManager.user.enums.Status;
 
 import io.micrometer.common.lang.Nullable;
 
@@ -57,4 +61,7 @@ public class User implements Serializable{
     @JoinTable(name="tbusers_roles", joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name="role_id"))
     private Role role;
+    
+    @Enumerated(EnumType.STRING)
+    private Status status;
 }

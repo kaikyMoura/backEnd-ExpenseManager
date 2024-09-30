@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lab.expenseManager.model.ResponseModel;
@@ -58,13 +59,22 @@ public class UserController {
 		}
 	}
 
-	
-	
+	@PostMapping("/verify-account")
+	public ResponseEntity<ResponseWithDataModel> verifyAccount(@RequestHeader("Authorization") String token) {
+		String jwtToken = token.substring(7);
+		return new ResponseEntity<>(
+				new ResponseWithDataModel(200, "Sua conta foi verifica com sucesso.", userService.activateAccount(jwtToken)),
+				HttpStatus.OK);
+
+	}
+
 	@GetMapping("/validate-token")
 	public ResponseEntity<ResponseWithDataModel> genetaNewToken(@RequestHeader("Authorization") String token) {
 		String jwtToken = token.substring(7);
-		return new ResponseEntity<>(new ResponseWithDataModel(200, "Token renovado com sucesso.", userService.generateNewToken(jwtToken)), HttpStatus.OK);
-	
+		return new ResponseEntity<>(
+				new ResponseWithDataModel(200, "Token renovado com sucesso.", userService.generateNewToken(jwtToken)),
+				HttpStatus.OK);
+
 	}
 
 	@GetMapping("/auth/user")
