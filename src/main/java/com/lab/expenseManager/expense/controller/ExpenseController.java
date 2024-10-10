@@ -53,7 +53,7 @@ public class ExpenseController {
 				expenseService.retriveExpensesCategories()), HttpStatus.OK);
 	}
 
-	@PostMapping
+	@PostMapping("/create")
 	public ResponseEntity<?> create(@RequestBody ExpenseDto expenseDto) {
 		for (Priority priority : Priority.values()) {
 			if (priority == expenseDto.priority()) {

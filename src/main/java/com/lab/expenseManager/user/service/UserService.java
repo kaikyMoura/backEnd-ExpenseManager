@@ -74,7 +74,6 @@ public class UserService {
 	}
 
 	public RecoveryJwtTokenDto generateNewToken(String token) {
-		try {
 			String email = jwtTokenService.getSubjectFromToken(token);
 			if (jwtTokenService.isTokenNearExpiration(token)) {
 
@@ -85,9 +84,6 @@ public class UserService {
 			} else {
 				throw new JWTVerificationException("Token ainda válido, nenhuma renovação necessária.");
 			}
-		} catch (JWTVerificationException ex) {
-			throw new JWTVerificationException("Token inválido ou expirado.");
-		}
 	}
 
 	public RecoveryJwtTokenDto activateAccount(String token) {
@@ -100,6 +96,8 @@ public class UserService {
 
 		this.update(u.getId(),
 				new UpdateUserDto(u.getName(), u.getLastName(), u.getEmail(), u.getUserImage(), u.getStatus()));
+
+		emailService.welcomeEmail(email);
 
 		String newToken = jwtTokenService.generateToken(user);
 		return new RecoveryJwtTokenDto(newToken);

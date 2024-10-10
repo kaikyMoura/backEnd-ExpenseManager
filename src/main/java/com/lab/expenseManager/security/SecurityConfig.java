@@ -35,8 +35,8 @@ public class SecurityConfig {
 
 	public static final String[] ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED = { "/users/login", "/users", "/users/validate-token", "/users/verify-account"};
 
-	public static final String[] ENDPOINTS_WITH_AUTHENTICATION_REQUIRED = { "/users/auth/**", "/expense/list",
-			"/expense/**", "/category/**" };
+	public static final String[] ENDPOINTS_WITH_AUTHENTICATION_REQUIRED = { "/users/auth/**", "/expense/**", "/expense/create","/expense/list",
+			"/expense/list/categories", "/category/**" };
 
 	/* public static final String [] ENDPOINTS_CUSTOMER = {"/users/customer"}; */
 
@@ -53,7 +53,7 @@ public class SecurityConfig {
 			public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 				CorsConfiguration corsConfiguration = new CorsConfiguration();
 				corsConfiguration.setAllowCredentials(true);
-				corsConfiguration.setAllowedOrigins(Arrays.asList("https://expense-manager-mocha.vercel.app"));
+				corsConfiguration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://expense-manager-mocha.vercel.app"));
 				corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 				corsConfiguration.setAllowedHeaders(List.of("*"));
 				corsConfiguration.setMaxAge(Duration.ofMinutes(5L));

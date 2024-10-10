@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 
 import com.sendgrid.Method;
 import com.sendgrid.Request;
-import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
@@ -28,7 +27,7 @@ public class EmailService {
 
 		String sendGridApiKey = dotenv.get("SENDGRID_API_KEY");
 
-		// Verifica se a chave foi carregada corretamente
+		//Verifica se a chave foi carregada corretamente
 		if (sendGridApiKey == null || sendGridApiKey.isEmpty()) {
 			throw new IllegalArgumentException("SENDGRID_API_KEY não encontrada ou está vazia.");
 		} else {
@@ -44,29 +43,43 @@ public class EmailService {
 			request.setEndpoint("mail/send");
 			request.addHeader("Content-Type", "application/json");
 			request.setBody(mail.build());
-			Response response = sendGrid.api(request);
+			sendGrid.api(request);
 		} catch (IOException ex) {
 			throw ex;
 		}
 	}
 
-	/*
-	 * public void sendEmail(String destinatario) { try { SimpleMailMessage mensagem
-	 * = new SimpleMailMessage(); mensagem.setTo(destinatario);
-	 * mensagem.setSubject("Bem vindo ao expense manager");
-	 * mensagem.setText("Olá! :):),\n" + "\n" +
-	 * "Seja muito bem-vindo(a) à nossa comunidade! Estamos muito felizes em tê-lo(a) conosco.\n"
-	 * + "\n" +
-	 * "Somos uma equipe dedicada a oferecer a melhor experiência possível aos nossos usuários, e estamos ansiosos para compartilhar tudo o que temos a oferecer com você.\n"
-	 * + "\n" +
-	 * "Sinta-se à vontade para explorar nosso site, descobrir nossos produtos incríveis e aproveitar as vantagens exclusivas de ser parte da nossa comunidade.\n"
-	 * + "\n" +
-	 * "Se precisar de qualquer ajuda ou tiver alguma dúvida, não hesite em entrar em contato conosco. Estamos sempre aqui para ajudar!\n"
-	 * + "\n" +
-	 * "Mais uma vez, obrigado(a) por se juntar a nós. Esperamos que você tenha uma experiência incrível em nossa plataforma.\n"
-	 * + "\n" + "Atenciosamente,\n" +
-	 * "O desenvolvedor que só queria deixar uma mensagem bonita");
-	 * javaMailSender.send(mensagem); } catch (Exception e) { e.printStackTrace(); }
-	 * }
-	 */
+	public void welcomeEmail(String toEmail) {
+		Dotenv dotenv = Dotenv.load();
+		Email from = new Email("kaikymoura972@gmail.com");
+
+		String sendGridApiKey = dotenv.get("SENDGRID_API_KEY");
+		Email to = new Email(toEmail);
+
+		SendGrid sendGrid = new SendGrid(sendGridApiKey);
+
+		String mailContent = "Olá! :):),\n" + "\n"
+				+ "Seja muito bem-vindo(a) à nossa comunidade! Estamos muito felizes em tê-lo(a) conosco.\n" + "\n"
+				+ "Somos uma equipe dedicada a oferecer a melhor experiência possível aos nossos usuários, e estamos ansiosos para compartilhar tudo o que temos a oferecer com você.\n"
+				+ "\n"
+				+ "Sinta-se à vontade para explorar nosso site, descobrir nossos produtos incríveis e aproveitar as vantagens exclusivas de ser parte da nossa comunidade.\n"
+				+ "\n"
+				+ "Se precisar de qualquer ajuda ou tiver alguma dúvida, não hesite em entrar em contato conosco. Estamos sempre aqui para ajudar!\n"
+				+ "\n"
+				+ "Mais uma vez, obrigado(a) por se juntar a nós. Esperamos que você tenha uma experiência incrível em nossa plataforma.\n"
+				+ "\n" + "Atenciosamente,\n" + "O desenvolvedor que só queria deixar uma mensagem bonita";
+
+		Content content = new Content("text", mailContent);
+		Mail mail = new Mail(from, "Quase lá...", to, content);
+		try {
+			Request request = new Request();
+			request.setMethod(Method.POST);
+			request.setEndpoint("mail/send");
+			request.addHeader("Content-Type", "application/json");
+			request.setBody(mail.build());
+			sendGrid.api(request);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }
