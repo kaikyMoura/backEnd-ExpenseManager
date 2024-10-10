@@ -57,6 +57,15 @@ As seguintes dependências estão sendo utilizadas:
   Lombok é uma biblioteca que ajuda a reduzir a quantidade de código boilerplate em projetos Java. Ela fornece anotações que geram automaticamente código durante a compilação, 
   como getters, setters, construtores e muito mais.
 
+- SendgridApi:
+
+SendGrid é uma plataforma de envio de e-mails que facilita a comunicação com clientes por meio de e-mails transacionais e marketing. Com uma API intuitiva, ela permite que desenvolvedores integrem rapidamente funcionalidades de envio de e-mails em suas aplicações, oferecendo recursos como rastreamento de e-mails, análise de desempenho e automação de marketing.
+
+- Google Cloud Platform (GCP):
+
+É uma suite de serviços de computação em nuvem oferecida pelo Google, que permite que empresas e desenvolvedores construam, implementem e escalem aplicativos, sites e serviços em uma infraestrutura altamente escalável e segura
+
+
   ## Arquitetura
   O projeto segue o padrão Rest, onde há a separação de serviços e controladores. Os endpoints de "test" requerem credenciais ou "roles" especiais. Ao criar uma conta, o usuário padrão é o "customer". Para criar uma conta, acesse o endpoint /user via método "POST" e forneça um email e senha, que serão encriptados e usados para validar o usuário. Após a criação, um token será gerado e utilizado para validar o login. Todo o processo de filtro e verificação é feito automaticamente durante a execução.
 
