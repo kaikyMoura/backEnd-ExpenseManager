@@ -38,15 +38,18 @@ public class UserService {
 
 	private final SecurityConfig securityConfig;
 
+	private final GCloudStorageService storageService;
+	
 	private final EmailService emailService;
 
 	public UserService(IUserRepository userRepositoy, IRoleRepository roleRepository, JwtTokenService jwtTokenService,
-			SecurityConfig securityConfig, UserDetailsServiceImpl userServiceImpl, EmailService emailService) {
+			SecurityConfig securityConfig, UserDetailsServiceImpl userServiceImpl, EmailService emailService, GCloudStorageService storageService) {
 		this.userRepository = userRepositoy;
 		this.roleRepository = roleRepository;
 		this.userServiceImpl = userServiceImpl;
 		this.jwtTokenService = jwtTokenService;
 		this.securityConfig = securityConfig;
+		this.storageService = storageService;
 		this.emailService = emailService;
 	}
 
@@ -110,12 +113,12 @@ public class UserService {
 			String requestRole = createUserDto.role() == null ? "ROLE_CUSTOMER" : createUserDto.role();
 
 			Role role = roleRepository.findByName(RoleName.valueOf(requestRole));
-
+			
 			User user = userRepository.save(User.builder().id(UUID.randomUUID()).name(createUserDto.name())
 					.lastName(createUserDto.lastName()).email(createUserDto.email())
 					.password(securityConfig.passwordEncoder().encode(createUserDto.password()))
 					.role(Role.builder().name(RoleName.valueOf(requestRole)).id(role.getId()).build())
-					.status(Status.INACTIVE).build());
+					.status(Status.INACTIVE).userImage(storageService.uploadFile(createUserDto.profileImage())).build());
 
 			String token = jwtTokenService.generateToken(new UserDetailsImpl(user));
 			emailService.verifyAccountEmail(createUserDto.email(), token);
