@@ -6,4 +6,4 @@ env: standard
 
 handlers:
   - url: /.*
-    script: this field is required, but ignored
+    script: auto

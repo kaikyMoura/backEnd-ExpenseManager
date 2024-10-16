@@ -1,7 +1,6 @@
 package com.lab.expenseManager.user.service;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.channels.Channels;
@@ -13,7 +12,6 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.google.api.core.ApiFuture;
-import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.BlobWriteSession;
@@ -22,29 +20,22 @@ import com.google.cloud.storage.Storage.BlobWriteOption;
 import com.google.cloud.storage.StorageOptions;
 import com.google.common.io.ByteStreams;
 
-import io.github.cdimascio.dotenv.Dotenv;
-
 @Service
 public class GCloudStorageService {
 
 	public String uploadFile(String file) throws FileNotFoundException, IOException {
-		Dotenv dotenv = Dotenv.load();
-		
 		if (file == null || file.isEmpty()) {
 			return null;
 		}
-		
+
 		String[] parts = file.split(",");
-        String imageData = parts.length > 1 ? parts[1] : parts[0];
+		String imageData = parts.length > 1 ? parts[1] : parts[0];
 
-        // Decodifica a string Base64 para bytes
-        byte[] imageBytes = Base64.getDecoder().decode(imageData);
+		// Decodifica a string Base64 para bytes
+		byte[] imageBytes = Base64.getDecoder().decode(imageData);
 
-		Storage storage = StorageOptions.newBuilder()
-			    .setCredentials(ServiceAccountCredentials.fromStream(new FileInputStream(dotenv.get("GOOGLE_APLICATION_CREDENTIALS"))))
-			    .build()
-			    .getService();
-		
+		Storage storage = StorageOptions.newBuilder().build().getService();
+
 		String bucketName = "expensemanager-assets-storage";
 		String blobName = UUID.randomUUID() + "_image.jpg";
 
@@ -71,4 +62,7 @@ public class GCloudStorageService {
 			throw new RuntimeException("Erro ao obter os resultados do upload", e);
 		}
 	}
+
+//	public byte[] getFile() {
+//	}
 }
