@@ -61,9 +61,13 @@ public class UserService {
 
 			// Checa se a senha está correta
 			if (!encoder.matches(loginUserDto.password(), user.getPassword())) {
-				throw new BadCredentialsException("Credenciais inválidas");
+				throw new BadCredentialsException("Senha incorreta!");
 			}
 
+			if (user.getStatus() == Status.INACTIVE) {
+				throw new BadCredentialsException("Sua conta ainda não foi ativada, por favor cheque seu email");
+			}
+			
 			// Gera um token JWT para o usuário autenticado
 			UserDetailsImpl userDetails = new UserDetailsImpl(user);
 

@@ -2,6 +2,7 @@ package com.lab.expenseManager.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -36,6 +37,13 @@ public class ExceptionHandlerController {
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ErrorResponseModel> handleUsernameNotFoundException(UsernameNotFoundException ex, WebRequest request) {
         ErrorResponseModel errorResponse = new ErrorResponseModel(404, "Usuário não encontrado.", ex.getMessage());
+        ex.printStackTrace();
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponseModel> handleUsernameBadCredentialsException(BadCredentialsException ex, WebRequest request) {
+        ErrorResponseModel errorResponse = new ErrorResponseModel(404, "Algum campo não foi preenchido corretamente", ex.getMessage());
         ex.printStackTrace();
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }

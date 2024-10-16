@@ -9,11 +9,10 @@ import java.nio.channels.WritableByteChannel;
 import java.util.Base64;
 import java.util.UUID;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import com.google.api.core.ApiFuture;
+import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.BlobWriteSession;
@@ -24,8 +23,6 @@ import com.google.common.io.ByteStreams;
 
 @Service
 public class GCloudStorageService {
-	
-	private final RestTemplate restTemplate = new RestTemplate();
 
 	public String uploadFile(String file) throws FileNotFoundException, IOException {
 		if (file == null || file.isEmpty()) {
@@ -69,14 +66,13 @@ public class GCloudStorageService {
 
 	public byte[] getFile(String path) {
 		try {
-			ResponseEntity<byte[]> response = restTemplate.getForEntity(path, byte[].class);
+			Storage storage = StorageOptions.getDefaultInstance().getService();
+	        Blob blob = storage.get(BlobId.of("expensemanager-assets-storage", path));
 
-			if (response.getStatusCode().is2xxSuccessful()) {
-				return response.getBody();
-			} else {
-				throw new RuntimeException(
-						"Erro ao buscar imagem: Código de resposta " + response.getStatusCode());
-			}
+	        if (blob == null || !blob.exists()) {
+	            throw new RuntimeException("Objeto não encontrado");
+	        }
+			return blob.getContent();
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException("Erro ao buscar imagem", e);
