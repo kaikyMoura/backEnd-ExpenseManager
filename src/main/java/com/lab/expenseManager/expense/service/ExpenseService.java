@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.lab.expenseManager.expense.domain.Category;
 import com.lab.expenseManager.expense.domain.Expense;
 import com.lab.expenseManager.expense.dto.CategoryDto;
+import com.lab.expenseManager.expense.dto.CreateExpenseDto;
 import com.lab.expenseManager.expense.dto.ExpenseDto;
 import com.lab.expenseManager.expense.dto.RetrieveUserExpensesDto;
 import com.lab.expenseManager.expense.repository.ExpenseRepository;
@@ -69,7 +70,7 @@ public class ExpenseService {
 		return null;
 	}
 
-	public void create(ExpenseDto expenseDto) {
+	public void create(CreateExpenseDto expenseDto) {
 		try {
 			List<Category> lista = this.retriveExpensesCategories();
 

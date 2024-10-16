@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.lab.expenseManager.expense.dto.CreateExpenseDto;
 import com.lab.expenseManager.expense.dto.ExpenseDto;
 import com.lab.expenseManager.expense.dto.RetrieveUserExpensesDto;
 import com.lab.expenseManager.expense.enums.Priority;
@@ -54,7 +55,7 @@ public class ExpenseController {
 	}
 
 	@PostMapping("/create")
-	public ResponseEntity<?> create(@RequestBody ExpenseDto expenseDto) {
+	public ResponseEntity<?> create(@RequestBody CreateExpenseDto expenseDto) {
 		for (Priority priority : Priority.values()) {
 			if (priority == expenseDto.priority()) {
 				return new ResponseEntity<>(new ErrorResponseModel(400, "Os dados fornecidos são invalidos.",
