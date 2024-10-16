@@ -54,7 +54,7 @@ public class GCloudStorageService {
 			BlobInfo uploadedBlobInfo = resultFuture.get();
 
 			// Retorna a URL pública do arquivo para ser salva no banco de dados
-			return String.format("https://storage.googleapis.com/%s/%s", bucketName, uploadedBlobInfo.getName());
+			return String.format(uploadedBlobInfo.getName());
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new RuntimeException("Erro ao fazer upload da imagem", e);
@@ -64,10 +64,10 @@ public class GCloudStorageService {
 		}
 	}
 
-	public byte[] getFile(String path) {
+	public byte[] getFile(String fileName) {
 		try {
 			Storage storage = StorageOptions.getDefaultInstance().getService();
-	        Blob blob = storage.get(BlobId.of("expensemanager-assets-storage", path));
+	        Blob blob = storage.get(BlobId.of("expensemanager-assets-storage", fileName));
 
 	        if (blob == null || !blob.exists()) {
 	            throw new RuntimeException("Objeto não encontrado");
