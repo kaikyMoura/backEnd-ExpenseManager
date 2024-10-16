@@ -78,6 +78,7 @@ public class GCloudStorageService {
 						"Erro ao buscar imagem: Código de resposta " + response.getStatusCode());
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new RuntimeException("Erro ao buscar imagem", e);
 		}
 	}
