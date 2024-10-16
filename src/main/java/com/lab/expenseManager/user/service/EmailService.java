@@ -17,7 +17,6 @@ import io.github.cdimascio.dotenv.Dotenv;
 public class EmailService {
 
 	void verifyAccountEmail(String toEmail, String token) throws IOException {
-		Dotenv dotenv = Dotenv.load();
 		String verificationLink = "https://expense-manager-mocha.vercel.app/VerifyAccount/accountVerify?token=" + token;
 		Email from = new Email("kaikymoura972@gmail.com");
 		String htmlContent = "<h1>Olá!</h1>" + "<p>Por favor, clique no link abaixo para verificar sua conta:</p>"
@@ -25,7 +24,7 @@ public class EmailService {
 		Email to = new Email(toEmail);
 		Content content = new Content("text/html", htmlContent);
 
-		String sendGridApiKey = dotenv.get("SENDGRID_API_KEY");
+		String sendGridApiKey = System.getenv("SENDGRID_API_KEY");
 
 		//Verifica se a chave foi carregada corretamente
 		if (sendGridApiKey == null || sendGridApiKey.isEmpty()) {
