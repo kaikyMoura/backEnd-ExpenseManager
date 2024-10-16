@@ -23,6 +23,7 @@ import com.lab.expenseManager.user.dto.CreateUserDto;
 import com.lab.expenseManager.user.dto.LoginUserDto;
 import com.lab.expenseManager.user.dto.RecoveryJwtTokenDto;
 import com.lab.expenseManager.user.dto.RecoveryUserDto;
+import com.lab.expenseManager.user.service.GCloudStorageService;
 import com.lab.expenseManager.user.service.UserService;
 
 @RestController
@@ -30,9 +31,12 @@ import com.lab.expenseManager.user.service.UserService;
 @RequestMapping(value = "/users")
 public class UserController {
 
+	private final GCloudStorageService storageService;
+
 	private final UserService userService;
 
-	public UserController(UserService userService) {
+	public UserController(UserService userService, GCloudStorageService storageService) {
+		this.storageService = storageService;
 		this.userService = userService;
 	}
 
@@ -61,9 +65,8 @@ public class UserController {
 	@PostMapping("/verify-account")
 	public ResponseEntity<ResponseWithDataModel> verifyAccount(@RequestHeader("Authorization") String token) {
 		String jwtToken = token.substring(7);
-		return new ResponseEntity<>(
-				new ResponseWithDataModel(200, "Sua conta foi verifica com sucesso.", userService.activateAccount(jwtToken)),
-				HttpStatus.OK);
+		return new ResponseEntity<>(new ResponseWithDataModel(200, "Sua conta foi verifica com sucesso.",
+				userService.activateAccount(jwtToken)), HttpStatus.OK);
 
 	}
 
@@ -80,8 +83,15 @@ public class UserController {
 	public ResponseEntity<ResponseWithDataModel> getUser() {
 		try {
 			User user = userService.getUser();
-			return new ResponseEntity<>(new ResponseWithDataModel(200, "Operação realizada com sucesso.",
-					new RecoveryUserDto(user.getName(), user.getLastName(), user.getEmail(), user.getUserImage())),
+
+			byte[] imageData = null;
+			if (user.getUserImage() != null) {
+				imageData = storageService.getFile(user.getUserImage());
+			}
+
+			return new ResponseEntity<>(
+					new ResponseWithDataModel(200, "Operação realizada com sucesso.",
+							new RecoveryUserDto(user.getName(), user.getLastName(), user.getEmail(), imageData)),
 					HttpStatus.OK);
 		} catch (Exception exception) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

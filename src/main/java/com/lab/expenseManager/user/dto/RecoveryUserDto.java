@@ -5,5 +5,5 @@ public record RecoveryUserDto (
 	String name,
 	String lastName,
     String email,
-	String image
+	byte[] image
 ) {}

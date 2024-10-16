@@ -9,7 +9,9 @@ import java.nio.channels.WritableByteChannel;
 import java.util.Base64;
 import java.util.UUID;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import com.google.api.core.ApiFuture;
 import com.google.cloud.storage.BlobId;
@@ -22,6 +24,8 @@ import com.google.common.io.ByteStreams;
 
 @Service
 public class GCloudStorageService {
+	
+	private final RestTemplate restTemplate = new RestTemplate();
 
 	public String uploadFile(String file) throws FileNotFoundException, IOException {
 		if (file == null || file.isEmpty()) {
@@ -63,6 +67,18 @@ public class GCloudStorageService {
 		}
 	}
 
-//	public byte[] getFile() {
-//	}
+	public byte[] getFile(String path) {
+		try {
+			ResponseEntity<byte[]> response = restTemplate.getForEntity(path, byte[].class);
+
+			if (response.getStatusCode().is2xxSuccessful()) {
+				return response.getBody();
+			} else {
+				throw new RuntimeException(
+						"Erro ao buscar imagem: Código de resposta " + response.getStatusCode());
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Erro ao buscar imagem", e);
+		}
+	}
 }
