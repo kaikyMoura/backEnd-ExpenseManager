@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lab.expenseManager.model.ResponseModel;
@@ -60,6 +61,13 @@ public class UserController {
 			return new ResponseEntity<>(new ResponseModel(500, "Erro interno no servidor."),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+
+	@PostMapping("/resend-email")
+	public ResponseEntity<ResponseModel> resendVerifyAccountEmail(@RequestParam("email") String email) {
+		userService.resendVerifyAccountEmail(email);
+		return new ResponseEntity<>(new ResponseModel(200, "Sua conta foi verifica com sucesso."), HttpStatus.ACCEPTED);
+
 	}
 
 	@PostMapping("/verify-account")

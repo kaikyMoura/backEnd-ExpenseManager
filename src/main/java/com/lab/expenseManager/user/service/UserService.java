@@ -39,11 +39,12 @@ public class UserService {
 	private final SecurityConfig securityConfig;
 
 	private final GCloudStorageService storageService;
-	
+
 	private final EmailService emailService;
 
 	public UserService(IUserRepository userRepositoy, IRoleRepository roleRepository, JwtTokenService jwtTokenService,
-			SecurityConfig securityConfig, UserDetailsServiceImpl userServiceImpl, EmailService emailService, GCloudStorageService storageService) {
+			SecurityConfig securityConfig, UserDetailsServiceImpl userServiceImpl, EmailService emailService,
+			GCloudStorageService storageService) {
 		this.userRepository = userRepositoy;
 		this.roleRepository = roleRepository;
 		this.userServiceImpl = userServiceImpl;
@@ -67,7 +68,7 @@ public class UserService {
 			if (user.getStatus() == Status.INACTIVE) {
 				throw new BadCredentialsException("Sua conta ainda não foi ativada, por favor cheque seu email");
 			}
-			
+
 			// Gera um token JWT para o usuário autenticado
 			UserDetailsImpl userDetails = new UserDetailsImpl(user);
 
@@ -81,16 +82,16 @@ public class UserService {
 	}
 
 	public RecoveryJwtTokenDto generateNewToken(String token) {
-			String email = jwtTokenService.getSubjectFromToken(token);
-			if (jwtTokenService.isTokenNearExpiration(token)) {
+		String email = jwtTokenService.getSubjectFromToken(token);
+		if (jwtTokenService.isTokenNearExpiration(token)) {
 
-				UserDetailsImpl user = userServiceImpl.loadUserByUsername(email);
+			UserDetailsImpl user = userServiceImpl.loadUserByUsername(email);
 
-				String newToken = jwtTokenService.generateToken(user);
-				return new RecoveryJwtTokenDto(newToken);
-			} else {
-				throw new JWTVerificationException("Token ainda válido, nenhuma renovação necessária.");
-			}
+			String newToken = jwtTokenService.generateToken(user);
+			return new RecoveryJwtTokenDto(newToken);
+		} else {
+			throw new JWTVerificationException("Token ainda válido, nenhuma renovação necessária.");
+		}
 	}
 
 	public RecoveryJwtTokenDto activateAccount(String token) {
@@ -110,6 +111,16 @@ public class UserService {
 		return new RecoveryJwtTokenDto(newToken);
 	}
 
+	public void resendVerifyAccountEmail(String email) {
+		try {
+			UserDetailsImpl user = userServiceImpl.loadUserByUsername(email);
+			String token = jwtTokenService.generateToken(user);
+			emailService.verifyAccountEmail(email, token);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	public void create(CreateUserDto createUserDto) {
 		try {
 			// Se no corpo da requisição não for passado um role especifico, como padrão ele
@@ -117,12 +128,13 @@ public class UserService {
 			String requestRole = createUserDto.role() == null ? "ROLE_CUSTOMER" : createUserDto.role();
 
 			Role role = roleRepository.findByName(RoleName.valueOf(requestRole));
-			
+
 			User user = userRepository.save(User.builder().id(UUID.randomUUID()).name(createUserDto.name())
 					.lastName(createUserDto.lastName()).email(createUserDto.email())
 					.password(securityConfig.passwordEncoder().encode(createUserDto.password()))
 					.role(Role.builder().name(RoleName.valueOf(requestRole)).id(role.getId()).build())
-					.status(Status.INACTIVE).userImage(storageService.uploadFile(createUserDto.profileImage())).build());
+					.status(Status.INACTIVE).userImage(storageService.uploadFile(createUserDto.profileImage()))
+					.build());
 
 			String token = jwtTokenService.generateToken(new UserDetailsImpl(user));
 			emailService.verifyAccountEmail(createUserDto.email(), token);

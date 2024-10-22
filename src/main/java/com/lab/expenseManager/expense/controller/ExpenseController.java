@@ -1,5 +1,6 @@
 package com.lab.expenseManager.expense.controller;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -56,11 +57,9 @@ public class ExpenseController {
 
 	@PostMapping("/create")
 	public ResponseEntity<?> create(@RequestBody CreateExpenseDto expenseDto) {
-		for (Priority priority : Priority.values()) {
-			if (priority == expenseDto.priority()) {
-				return new ResponseEntity<>(new ErrorResponseModel(400, "Os dados fornecidos são invalidos.",
-						"Valor invalido para o campo prioridade."), HttpStatus.BAD_REQUEST);
-			}
+		if (!EnumSet.allOf(Priority.class).contains(expenseDto.priority())) {
+			return new ResponseEntity<>(new ErrorResponseModel(400, "Os dados fornecidos são invalidos.",
+					"Valor invalido para o campo prioridade."), HttpStatus.BAD_REQUEST);
 		}
 
 		expenseService.create(expenseDto);

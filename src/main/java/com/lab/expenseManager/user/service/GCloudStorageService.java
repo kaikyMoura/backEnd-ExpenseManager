@@ -70,7 +70,7 @@ public class GCloudStorageService {
 	        Blob blob = storage.get(BlobId.of("expensemanager-assets-storage", fileName));
 
 	        if (blob == null || !blob.exists()) {
-	            throw new RuntimeException("Objeto não encontrado");
+	            throw new IllegalArgumentException("Objeto não encontrado");
 	        }
 			return blob.getContent();
 		} catch (Exception e) {
