@@ -13,6 +13,7 @@ public record CreateExpenseDto(
 	    CategoryDto category,
 	    String currency,
 	    Boolean isRecurring,
+	    Boolean isPaid,
 	    ArrayList<String> attachments,
 	    Priority priority
 	    ) {}

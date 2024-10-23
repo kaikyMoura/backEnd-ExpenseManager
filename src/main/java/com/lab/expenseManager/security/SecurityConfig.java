@@ -38,8 +38,6 @@ public class SecurityConfig {
 	public static final String[] ENDPOINTS_WITH_AUTHENTICATION_REQUIRED = { "/users/auth/**", "/expense/**", "/expense/create","/expense/list",
 			"/expense/list/categories", "/category/**" };
 
-	/* public static final String [] ENDPOINTS_CUSTOMER = {"/users/customer"}; */
-
 	public static final String[] ENDPOINTS_ADMIN = { "/users/administrator", "/users/administrator/list",
 			"/users/administrator/delete/**" };
 

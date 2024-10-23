@@ -10,6 +10,7 @@ import org.hibernate.Hibernate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lab.expenseManager.expense.enums.Priority;
+import com.lab.expenseManager.expense.enums.Status;
 import com.lab.expenseManager.user.domain.User;
 
 import jakarta.annotation.Nullable;
@@ -71,11 +72,16 @@ public class Expense implements Serializable {
 
 	private Boolean isRecurring;
 
+	private Boolean isPaid;
+	
 	@ElementCollection
 	private List<String> attachments;
 
 	@Enumerated(EnumType.STRING)
 	private Priority priority;
+	
+	@Enumerated(EnumType.STRING)
+	private Status status;
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "user_id", referencedColumnName = "id")

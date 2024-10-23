@@ -115,7 +115,7 @@ public class UserService {
 		try {
 			UserDetailsImpl user = userServiceImpl.loadUserByUsername(email);
 			String token = jwtTokenService.generateToken(user);
-			emailService.verifyAccountEmail(email, token);
+			emailService.sendVerifyAccountEmail(email, token);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -123,8 +123,7 @@ public class UserService {
 
 	public void create(CreateUserDto createUserDto) {
 		try {
-			// Se no corpo da requisição não for passado um role especifico, como padrão ele
-			// será setado como "CUSTOMER"
+			// Se no corpo da requisição não for passado um role especifico, como padrão ele será setado como "CUSTOMER"
 			String requestRole = createUserDto.role() == null ? "ROLE_CUSTOMER" : createUserDto.role();
 
 			Role role = roleRepository.findByName(RoleName.valueOf(requestRole));
@@ -137,7 +136,7 @@ public class UserService {
 					.build());
 
 			String token = jwtTokenService.generateToken(new UserDetailsImpl(user));
-			emailService.verifyAccountEmail(createUserDto.email(), token);
+			emailService.sendVerifyAccountEmail(createUserDto.email(), token);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException("Erro ao executar a operação", e.getCause());

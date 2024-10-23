@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.lab.expenseManager.configuration.SchedulingExpenses;
 import com.lab.expenseManager.expense.domain.Category;
 import com.lab.expenseManager.expense.domain.Expense;
 import com.lab.expenseManager.expense.dto.CategoryDto;
@@ -28,12 +29,14 @@ public class ExpenseService {
 	private final ExpenseRepository expenseRepository;
 	private final UserService userService;
 	private final CategoryService categoryService;
+	private final SchedulingExpenses schedulingExpenses;
 
 	public ExpenseService(ExpenseRepository expenseRepository, UserService userService,
-			CategoryService categoryService) {
+			CategoryService categoryService, SchedulingExpenses schedulingExpenses) {
 		this.expenseRepository = expenseRepository;
 		this.userService = userService;
 		this.categoryService = categoryService;
+		this.schedulingExpenses = schedulingExpenses;
 	}
 
 	public List<Expense> findAll() {
@@ -56,7 +59,7 @@ public class ExpenseService {
 							expense.getDescription(), expense.getAmount(),
 							new SimpleDateFormat("yyyy/MM/dd").format(expense.getDate()).toString(),
 							expense.getCategory(), expense.getCurrency(), expense.getIsRecurring(),
-							expense.getAttachments(), expense.getPriority())))
+							expense.getAttachments(), expense.getPriority(), expense.getStatus())))
 					.collect(Collectors.toList());
 
 			return expensesDtos;
@@ -92,9 +95,9 @@ public class ExpenseService {
 
 			expenseRepository.save(Expense.builder().id(UUID.randomUUID()).name(expenseDto.name())
 					.description(expenseDto.description()).category(category).amount(expenseDto.amount())
-					.currency(expenseDto.currency()).isRecurring(expenseDto.isRecurring())
+					.currency(expenseDto.currency()).isRecurring(expenseDto.isRecurring()).isPaid(expenseDto.isPaid())
 					.attachments(expenseDto.attachments())
-					.priority(expenseDto.priority())
+					.priority(expenseDto.priority()).status(schedulingExpenses.determineExpenseStatus(expenseDto.date(), expenseDto.isPaid()))
 					.date(expenseDto.date()).user(userService.getUser()).build());
 			
 			
@@ -111,7 +114,7 @@ public class ExpenseService {
 		return new RetrieveUserExpensesDto(expense.getId(), expense.getName(), expense.getDescription(),
 				expense.getAmount(), new SimpleDateFormat("yyyy/MM/dd").format(expense.getDate()).toString(),
 				expense.getCategory(), expense.getCurrency(), expense.getIsRecurring(), expense.getAttachments(),
-				expense.getPriority());
+				expense.getPriority(), expense.getStatus());
 	}
 
 	public void delete(UUID id) {

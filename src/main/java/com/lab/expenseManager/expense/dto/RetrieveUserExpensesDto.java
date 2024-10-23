@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import com.lab.expenseManager.expense.domain.Category;
 import com.lab.expenseManager.expense.enums.Priority;
+import com.lab.expenseManager.expense.enums.Status;
 
 public record RetrieveUserExpensesDto(
 		UUID id,
@@ -16,5 +17,6 @@ public record RetrieveUserExpensesDto(
 	    String currency,
 	    Boolean isRecurring,
 	    List<String> attachments,
-	    Priority priority
+	    Priority priority,
+	    Status status
 		) {}

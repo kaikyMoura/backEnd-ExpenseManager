@@ -16,7 +16,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 @Service
 public class EmailService {
 
-	void verifyAccountEmail(String toEmail, String token) throws IOException {
+	void sendVerifyAccountEmail(String toEmail, String token) throws IOException {
 		String verificationLink = "https://expense-manager-mocha.vercel.app/VerifyAccount/accountVerify?token=" + token;
 		Email from = new Email("kaikymoura972@gmail.com");
 		String htmlContent = "<h1>Olá!</h1>" + "<p>Por favor, clique no link abaixo para verificar sua conta:</p>"
