@@ -1,12 +1,13 @@
 package com.lab.expenseManager.user.service;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -55,30 +56,24 @@ public class UserService {
 	}
 
 	public RecoveryJwtTokenDto authenticateUser(LoginUserDto loginUserDto) {
-		try {
-			BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-			User user = userRepository.findByEmail(loginUserDto.email()).orElseThrow(
-					() -> new UsernameNotFoundException("Usuário não encontrado com o email: " + loginUserDto.email()));
+		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+		User user = userRepository.findByEmail(loginUserDto.email())
+				.orElseThrow(() -> new BadCredentialsException("As credenciais fornecidas são inválidas."));
 
-			// Checa se a senha está correta
-			if (!encoder.matches(loginUserDto.password(), user.getPassword())) {
-				throw new BadCredentialsException("Senha incorreta!");
-			}
+		// Checa se a senha está correta
+		if (!encoder.matches(loginUserDto.password(), user.getPassword())) {
+			throw new BadCredentialsException("As credenciais fornecidas são inválidas.");
+		}
 
 			if (user.getStatus() == Status.INACTIVE) {
 				throw new BadCredentialsException("Sua conta ainda não foi ativada, por favor cheque seu email");
 			}
 
-			// Gera um token JWT para o usuário autenticado
-			UserDetailsImpl userDetails = new UserDetailsImpl(user);
+		// Gera um token JWT para o usuário autenticado
+		UserDetailsImpl userDetails = new UserDetailsImpl(user);
 
-			String token = jwtTokenService.generateToken(userDetails);
-			return new RecoveryJwtTokenDto(token);
-
-		} catch (Exception exception) {
-			exception.printStackTrace();
-			throw new RuntimeException("Erro ao autenticar o usuário", exception);
-		}
+		String token = jwtTokenService.generateToken(userDetails);
+		return new RecoveryJwtTokenDto(token);
 	}
 
 	public RecoveryJwtTokenDto generateNewToken(String token) {
@@ -120,27 +115,32 @@ public class UserService {
 			e.printStackTrace();
 		}
 	}
-
-	public void create(CreateUserDto createUserDto) {
+	
+	public void sendResetPasswordEmail(String email) {
 		try {
-			// Se no corpo da requisição não for passado um role especifico, como padrão ele será setado como "CUSTOMER"
-			String requestRole = createUserDto.role() == null ? "ROLE_CUSTOMER" : createUserDto.role();
-
-			Role role = roleRepository.findByName(RoleName.valueOf(requestRole));
-
-			User user = userRepository.save(User.builder().id(UUID.randomUUID()).name(createUserDto.name())
-					.lastName(createUserDto.lastName()).email(createUserDto.email())
-					.password(securityConfig.passwordEncoder().encode(createUserDto.password()))
-					.role(Role.builder().name(RoleName.valueOf(requestRole)).id(role.getId()).build())
-					.status(Status.INACTIVE).userImage(storageService.uploadFile(createUserDto.profileImage()))
-					.build());
-
-			String token = jwtTokenService.generateToken(new UserDetailsImpl(user));
-			emailService.sendVerifyAccountEmail(createUserDto.email(), token);
+			UserDetailsImpl user = userServiceImpl.loadUserByUsername(email);
+			String token = jwtTokenService.generateToken(user);
+			emailService.sendResetPasswordEmail(email, token);
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new RuntimeException("Erro ao executar a operação", e.getCause());
 		}
+	}
+
+	public void create(CreateUserDto createUserDto) throws FileNotFoundException, IOException {
+		// Se no corpo da requisição não for passado um role especifico, como padrão ele
+		// será setado como "CUSTOMER"
+		String requestRole = createUserDto.role() == null ? "ROLE_CUSTOMER" : createUserDto.role();
+
+		Role role = roleRepository.findByName(RoleName.valueOf(requestRole));
+
+		User user = userRepository.save(User.builder().id(UUID.randomUUID()).name(createUserDto.name())
+				.lastName(createUserDto.lastName()).email(createUserDto.email())
+				.password(securityConfig.passwordEncoder().encode(createUserDto.password()))
+				.role(Role.builder().name(RoleName.valueOf(requestRole)).id(role.getId()).build())
+				.status(Status.INACTIVE).userImage(storageService.uploadFile(createUserDto.profileImage())).build());
+
+		String token = jwtTokenService.generateToken(new UserDetailsImpl(user));
+		emailService.sendVerifyAccountEmail(createUserDto.email(), token);
 	}
 
 	public void deleteById(UUID id) throws Exception {
@@ -149,6 +149,19 @@ public class UserService {
 		} catch (Exception exception) {
 			throw new Exception("Erro ao executar a operação!");
 		}
+	}
+
+	public void updatePassword(String token, String password) {
+		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+		String email = jwtTokenService.getSubjectFromToken(token);
+		User existingUser = userServiceImpl.loadUserByUsername(email).getUser();
+		
+		if (encoder.matches(existingUser.getPassword(), password)) {
+			throw new BadCredentialsException("A nova senha deve ser diferente das 5 ultimas.");
+		}
+		existingUser.setPassword(securityConfig.passwordEncoder().encode(password));
+		
+		userRepository.save(existingUser);
 	}
 
 	public void update(UUID uuid, UpdateUserDto updateUserDto) {

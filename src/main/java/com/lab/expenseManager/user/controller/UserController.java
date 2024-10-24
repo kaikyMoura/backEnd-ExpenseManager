@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,13 +44,9 @@ public class UserController {
 
 	@PostMapping("/login")
 	public ResponseEntity<ResponseWithDataModel> authenticateUser(@RequestBody LoginUserDto loginUserDto) {
-		try {
 			RecoveryJwtTokenDto token = userService.authenticateUser(loginUserDto);
 			return new ResponseEntity<>(new ResponseWithDataModel(200, "Operação realizada com sucesso.", token),
 					HttpStatus.OK);
-		} catch (Exception exception) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
 	}
 
 	@PostMapping
@@ -68,6 +65,20 @@ public class UserController {
 		userService.resendVerifyAccountEmail(email);
 		return new ResponseEntity<>(new ResponseModel(200, "Sua conta foi verifica com sucesso."), HttpStatus.ACCEPTED);
 
+	}
+	
+	@PostMapping("/send-resetpassword-email")
+	public ResponseEntity<ResponseModel> sendResetPasswordEmail(@RequestParam("email") String email) {
+		userService.sendResetPasswordEmail(email);
+		return new ResponseEntity<>(new ResponseModel(200, "Sua conta foi verifica com sucesso."), HttpStatus.ACCEPTED);
+
+	}
+
+	
+	@PutMapping("/change-password")
+	public ResponseEntity<ResponseModel> changePassword(@RequestHeader("Authorization") String token, @RequestBody String password) {
+		userService.updatePassword(token, password);
+		return new ResponseEntity<>(new ResponseModel(200, "Senha atualizada com sucesso."), HttpStatus.ACCEPTED);
 	}
 
 	@PostMapping("/verify-account")

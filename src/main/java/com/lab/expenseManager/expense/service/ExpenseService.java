@@ -12,7 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.lab.expenseManager.configuration.SchedulingExpenses;
 import com.lab.expenseManager.expense.domain.Category;
 import com.lab.expenseManager.expense.domain.Expense;
 import com.lab.expenseManager.expense.dto.CategoryDto;
@@ -20,6 +19,7 @@ import com.lab.expenseManager.expense.dto.CreateExpenseDto;
 import com.lab.expenseManager.expense.dto.ExpenseDto;
 import com.lab.expenseManager.expense.dto.RetrieveUserExpensesDto;
 import com.lab.expenseManager.expense.repository.ExpenseRepository;
+import com.lab.expenseManager.schedules.SchedulingExpenses;
 import com.lab.expenseManager.user.domain.User;
 import com.lab.expenseManager.user.service.UserService;
 

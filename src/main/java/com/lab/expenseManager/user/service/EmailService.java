@@ -48,6 +48,48 @@ public class EmailService {
 		}
 	}
 
+	void sendResetPasswordEmail(String toEmail, String token) throws IOException {
+		String verificationLink = "http://localhost:3000/ChangePassword/changePassword?token=" + token;
+		Email from = new Email("kaikymoura972@gmail.com");
+		String htmlContent = "<h1>Olá!</h1>" + "<p>Recebemos uma solicitação para redefinir a senha da sua conta. Se você fez essa solicitação, siga as instruções abaixo para criar uma nova senha:</p>" + "<p>Clique no link abaixo para redefinir sua senha:</p>"
+				+ "<a href='" + verificationLink + "style='"
+					    + "display: inline-block; "
+					    + "padding: 10px 20px; "
+					    + "font-size: 16px; "
+					    + "color: white; "
+					    + "background-color: #4CAF50; "
+					    + "text-decoration: none; "
+					    + "border-radius: 5px; "
+					    + "margin: 10px 0;'>"
+					    + "Redefinir Senha</a>"
+					    + "<p>Se você não fez essa solicitação, pode ignorar este e-mail.</p>";
+		Email to = new Email(toEmail);
+		Content content = new Content("text/html", htmlContent);
+
+		String sendGridApiKey = System.getenv("SENDGRID_API_KEY");
+
+		//Verifica se a chave foi carregada corretamente
+		if (sendGridApiKey == null || sendGridApiKey.isEmpty()) {
+			throw new IllegalArgumentException("SENDGRID_API_KEY não encontrada ou está vazia.");
+		} else {
+			System.out.println("SENDGRID_API_KEY carregada com sucesso.");
+		}
+
+		SendGrid sendGrid = new SendGrid(sendGridApiKey);
+		Mail mail = new Mail(from, "Quase lá...", to, content);
+
+		try {
+			Request request = new Request();
+			request.setMethod(Method.POST);
+			request.setEndpoint("mail/send");
+			request.addHeader("Content-Type", "application/json");
+			request.setBody(mail.build());
+			sendGrid.api(request);
+		} catch (IOException ex) {
+			throw ex;
+		}
+	}
+	
 	public void welcomeEmail(String toEmail) {
 		Dotenv dotenv = Dotenv.load();
 		Email from = new Email("kaikymoura972@gmail.com");

@@ -1,4 +1,4 @@
-package com.lab.expenseManager.configuration;
+package com.lab.expenseManager.schedules;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
