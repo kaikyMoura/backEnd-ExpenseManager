@@ -2,9 +2,11 @@ package com.lab.expenseManager.user.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Base64;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Properties;
 
 import org.springframework.stereotype.Service;
 
@@ -12,19 +14,29 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.gmail.Gmail;
+import com.google.api.services.gmail.GmailScopes;
 import com.google.api.services.gmail.model.Message;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.Session;
+import jakarta.mail.internet.AddressException;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMessage.RecipientType;
+
 @Service
 public class GmailAPIService {
 
 	private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
+	private static final Collection<String> SCOPES = Collections.singleton(GmailScopes.GMAIL_SEND);
 
 	void sendVerifyAccountEmail(String toEmail, String token) throws Exception {
 
-		final GoogleCredentials googleCredentials = ServiceAccountCredentials.getApplicationDefault();
+		final GoogleCredentials googleCredentials = ServiceAccountCredentials.getApplicationDefault()
+				.createScoped(SCOPES);
 
 		final Gmail gmailService = new Gmail.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY,
 				new HttpCredentialsAdapter(googleCredentials)).setApplicationName("Gmail API Java").build();
@@ -43,16 +55,22 @@ public class GmailAPIService {
 		}
 	}
 
-	private Message createEmail(String to, String subject, String bodyText) throws IOException {
-		String from = "kaikymoura972@gmail.com";
-		String messageText = "From: " + from + "\n" + "To: " + to + "\n" + "Subject: " + subject + "\n"
-				+ "MIME-Version: 1.0\n" + "Content-Type: text/html; charset=UTF-8\n\n" + bodyText;
+	private Message createEmail(String to, String subject, String bodyText)
+			throws IOException, AddressException, MessagingException {
+		Properties props = new Properties();
+		Session session = Session.getDefaultInstance(props, null);
+
+		MimeMessage email = new MimeMessage(session);
+		email.setFrom(new InternetAddress("kaikymoura972@gmail.com"));
+		email.addRecipient(RecipientType.TO, new InternetAddress(to));
+		email.setSubject(subject);
+		email.setContent(bodyText, "text/html; charset=UTF-8");
 
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-		buffer.write(messageText.getBytes(StandardCharsets.UTF_8));
-		byte[] bytes = buffer.toByteArray();
+		email.writeTo(buffer);
+		byte[] rawMessageBytes = buffer.toByteArray();
+		String encodedEmail = Base64.getUrlEncoder().encodeToString(rawMessageBytes);
 
-		String encodedEmail = Base64.getUrlEncoder().encodeToString(bytes);
 		Message message = new Message();
 		message.setRaw(encodedEmail);
 		return message;
