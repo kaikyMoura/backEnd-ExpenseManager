@@ -3,6 +3,7 @@ package com.lab.expenseManager.user.service;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.security.authentication.BadCredentialsException;
@@ -65,9 +66,9 @@ public class UserService {
 			throw new BadCredentialsException("As credenciais fornecidas são inválidas.");
 		}
 
-			if (user.getStatus() == Status.INACTIVE) {
-				throw new BadCredentialsException("Sua conta ainda não foi ativada, por favor cheque seu email");
-			}
+		if (user.getStatus() == Status.INACTIVE) {
+			throw new BadCredentialsException("Sua conta ainda não foi ativada, por favor cheque seu email");
+		}
 
 		// Gera um token JWT para o usuário autenticado
 		UserDetailsImpl userDetails = new UserDetailsImpl(user);
@@ -100,25 +101,27 @@ public class UserService {
 		this.update(u.getId(),
 				new UpdateUserDto(u.getName(), u.getLastName(), u.getEmail(), u.getUserImage(), u.getStatus()));
 
-		//emailService.welcomeEmail(email);
-
 		String newToken = jwtTokenService.generateToken(user);
 		return new RecoveryJwtTokenDto(newToken);
 	}
 
 	public void resendVerifyAccountEmail(String email) throws Exception {
-			UserDetailsImpl user = userServiceImpl.loadUserByUsername(email);
-			String token = jwtTokenService.generateToken(user);
-			emailService.sendVerifyAccountEmail(email, token);
+		UserDetailsImpl user = userServiceImpl.loadUserByUsername(email);
+		String token = jwtTokenService.generateToken(user);
+		emailService.sendVerifyAccountEmail(email, token);
 	}
-	
+
 	public void sendResetPasswordEmail(String email) throws IOException, GeneralSecurityException {
-			UserDetailsImpl user = userServiceImpl.loadUserByUsername(email);
-			String token = jwtTokenService.generateToken(user);
-			emailService.sendResetPasswordEmail(email, token);
+		UserDetailsImpl user = userServiceImpl.loadUserByUsername(email);
+		String token = jwtTokenService.generateToken(user);
+		emailService.sendResetPasswordEmail(email, token);
 	}
 
 	public void create(CreateUserDto createUserDto) throws Exception {
+		Optional<User> userOpt = userRepository.findByEmail(createUserDto.email());
+		if (userOpt.isPresent()) {
+			throw new BadCredentialsException("Já existe um usuário com esse email.");
+		}
 		// Se no corpo da requisição não for passado um role especifico, como padrão ele
 		// será setado como "CUSTOMER"
 		String requestRole = createUserDto.role() == null ? "ROLE_CUSTOMER" : createUserDto.role();
@@ -147,12 +150,12 @@ public class UserService {
 		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 		String email = jwtTokenService.getSubjectFromToken(token);
 		User existingUser = userServiceImpl.loadUserByUsername(email).getUser();
-		
+
 		if (encoder.matches(existingUser.getPassword(), password)) {
 			throw new BadCredentialsException("A nova senha deve ser diferente das 5 ultimas.");
 		}
 		existingUser.setPassword(securityConfig.passwordEncoder().encode(password));
-		
+
 		userRepository.save(existingUser);
 	}
 

@@ -61,7 +61,7 @@ public class UserController {
 	public ResponseEntity<ResponseModel> resendVerifyAccountEmail(@RequestParam("email") String email)
 			throws Exception {
 		userService.resendVerifyAccountEmail(email);
-		return new ResponseEntity<>(new ResponseModel(200, "Sua conta foi verifica com sucesso."), HttpStatus.ACCEPTED);
+		return new ResponseEntity<>(new ResponseModel(200, "Um email foi enviado para caixa de entrada do seu e-mail."), HttpStatus.ACCEPTED);
 
 	}
 

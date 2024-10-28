@@ -28,6 +28,7 @@ public class GmailAPIService {
 
 		final Gmail gmailService = new Gmail.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY,
 				new HttpCredentialsAdapter(googleCredentials)).setApplicationName("Gmail API Java").build();
+
 		try {
 			String verificationLink = "https://expense-manager-mocha.vercel.app/VerifyAccount/accountVerify?token="
 					+ token;

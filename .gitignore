@@ -1,5 +1,7 @@
 .env
 
+credentials.json
+
 # Compiled class file
 *.class
 
