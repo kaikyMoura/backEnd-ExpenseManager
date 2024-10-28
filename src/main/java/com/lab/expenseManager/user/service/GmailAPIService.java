@@ -49,7 +49,7 @@ public class GmailAPIService {
 					+ "<a href='" + verificationLink + "'>Clique aqui</a>";
 
 			Message message = this.createEmail(toEmail, "Quase lá...", htmlContent);
-			gmailService.users().messages().send("me", message);
+			gmailService.users().messages().send("me", message).execute();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -94,7 +94,7 @@ public class GmailAPIService {
 					+ "<p>Se você não fez essa solicitação, pode ignorar este e-mail.</p>";
 
 			Message message = this.createEmail(toEmail, "Redifinição de senha", htmlContent);
-			gmailService.users().messages().send("me", message);
+			gmailService.users().messages().send("me", message).execute();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
