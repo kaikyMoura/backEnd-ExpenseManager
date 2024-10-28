@@ -1,5 +1,7 @@
 package com.lab.expenseManager.user.controller;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,39 +46,37 @@ public class UserController {
 
 	@PostMapping("/login")
 	public ResponseEntity<ResponseWithDataModel> authenticateUser(@RequestBody LoginUserDto loginUserDto) {
-			RecoveryJwtTokenDto token = userService.authenticateUser(loginUserDto);
-			return new ResponseEntity<>(new ResponseWithDataModel(200, "Operação realizada com sucesso.", token),
-					HttpStatus.OK);
+		RecoveryJwtTokenDto token = userService.authenticateUser(loginUserDto);
+		return new ResponseEntity<>(new ResponseWithDataModel(200, "Operação realizada com sucesso.", token),
+				HttpStatus.OK);
 	}
 
 	@PostMapping
-	public ResponseEntity<ResponseModel> createUser(@RequestBody CreateUserDto user) {
-		try {
-			userService.create(user);
-			return new ResponseEntity<>(new ResponseModel(201, "Operação realizada com sucesso."), HttpStatus.CREATED);
-		} catch (Exception exception) {
-			return new ResponseEntity<>(new ResponseModel(500, "Erro interno no servidor."),
-					HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+	public ResponseEntity<ResponseModel> createUser(@RequestBody CreateUserDto user) throws Exception {
+		userService.create(user);
+		return new ResponseEntity<>(new ResponseModel(201, "Operação realizada com sucesso."), HttpStatus.CREATED);
 	}
 
 	@PostMapping("/resend-email")
-	public ResponseEntity<ResponseModel> resendVerifyAccountEmail(@RequestParam("email") String email) {
+	public ResponseEntity<ResponseModel> resendVerifyAccountEmail(@RequestParam("email") String email)
+			throws Exception {
 		userService.resendVerifyAccountEmail(email);
 		return new ResponseEntity<>(new ResponseModel(200, "Sua conta foi verifica com sucesso."), HttpStatus.ACCEPTED);
 
 	}
-	
-	@PostMapping("/send-resetpassword-email")
-	public ResponseEntity<ResponseModel> sendResetPasswordEmail(@RequestParam("email") String email) {
-		userService.sendResetPasswordEmail(email);
-		return new ResponseEntity<>(new ResponseModel(200, "Sua conta foi verifica com sucesso."), HttpStatus.ACCEPTED);
 
+	@PostMapping("/send-resetpassword-email")
+	public ResponseEntity<ResponseModel> sendResetPasswordEmail(@RequestParam("email") String email)
+			throws IOException, GeneralSecurityException {
+		userService.sendResetPasswordEmail(email);
+		return new ResponseEntity<>(
+				new ResponseModel(200, "Uma mensagem foi enviada para seu email, verifique sua caixa de entrada."),
+				HttpStatus.OK);
 	}
 
-	
 	@PutMapping("/change-password")
-	public ResponseEntity<ResponseModel> changePassword(@RequestHeader("Authorization") String token, @RequestBody String password) {
+	public ResponseEntity<ResponseModel> changePassword(@RequestHeader("Authorization") String token,
+			@RequestBody String password) {
 		userService.updatePassword(token, password);
 		return new ResponseEntity<>(new ResponseModel(200, "Senha atualizada com sucesso."), HttpStatus.ACCEPTED);
 	}

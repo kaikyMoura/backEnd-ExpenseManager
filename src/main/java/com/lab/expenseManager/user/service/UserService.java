@@ -1,7 +1,7 @@
 package com.lab.expenseManager.user.service;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,10 +41,10 @@ public class UserService {
 
 	private final GCloudStorageService storageService;
 
-	private final EmailService emailService;
+	private final GmailAPIService emailService;
 
 	public UserService(IUserRepository userRepositoy, IRoleRepository roleRepository, JwtTokenService jwtTokenService,
-			SecurityConfig securityConfig, UserDetailsServiceImpl userServiceImpl, EmailService emailService,
+			SecurityConfig securityConfig, UserDetailsServiceImpl userServiceImpl, GmailAPIService emailService,
 			GCloudStorageService storageService) {
 		this.userRepository = userRepositoy;
 		this.roleRepository = roleRepository;
@@ -100,33 +100,25 @@ public class UserService {
 		this.update(u.getId(),
 				new UpdateUserDto(u.getName(), u.getLastName(), u.getEmail(), u.getUserImage(), u.getStatus()));
 
-		emailService.welcomeEmail(email);
+		//emailService.welcomeEmail(email);
 
 		String newToken = jwtTokenService.generateToken(user);
 		return new RecoveryJwtTokenDto(newToken);
 	}
 
-	public void resendVerifyAccountEmail(String email) {
-		try {
+	public void resendVerifyAccountEmail(String email) throws Exception {
 			UserDetailsImpl user = userServiceImpl.loadUserByUsername(email);
 			String token = jwtTokenService.generateToken(user);
 			emailService.sendVerifyAccountEmail(email, token);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 	
-	public void sendResetPasswordEmail(String email) {
-		try {
+	public void sendResetPasswordEmail(String email) throws IOException, GeneralSecurityException {
 			UserDetailsImpl user = userServiceImpl.loadUserByUsername(email);
 			String token = jwtTokenService.generateToken(user);
 			emailService.sendResetPasswordEmail(email, token);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
-	public void create(CreateUserDto createUserDto) throws FileNotFoundException, IOException {
+	public void create(CreateUserDto createUserDto) throws Exception {
 		// Se no corpo da requisição não for passado um role especifico, como padrão ele
 		// será setado como "CUSTOMER"
 		String requestRole = createUserDto.role() == null ? "ROLE_CUSTOMER" : createUserDto.role();
