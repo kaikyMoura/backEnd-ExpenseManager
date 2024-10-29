@@ -42,10 +42,10 @@ public class UserService {
 
 	private final GCloudStorageService storageService;
 
-	private final GmailAPIService emailService;
+	private final EmailService emailService;
 
 	public UserService(IUserRepository userRepositoy, IRoleRepository roleRepository, JwtTokenService jwtTokenService,
-			SecurityConfig securityConfig, UserDetailsServiceImpl userServiceImpl, GmailAPIService emailService,
+			SecurityConfig securityConfig, UserDetailsServiceImpl userServiceImpl, EmailService emailService,
 			GCloudStorageService storageService) {
 		this.userRepository = userRepositoy;
 		this.roleRepository = roleRepository;
@@ -132,8 +132,9 @@ public class UserService {
 				.lastName(createUserDto.lastName()).email(createUserDto.email())
 				.password(securityConfig.passwordEncoder().encode(createUserDto.password()))
 				.role(Role.builder().name(RoleName.valueOf(requestRole)).id(role.getId()).build())
-				.status(Status.INACTIVE).userImage(storageService.uploadFile(createUserDto.profileImage())).build());
+				.status(Status.INACTIVE).userImage(createUserDto.profileImage()).build());
 
+		// storageService.uploadFile(createUserDto.profileImage()
 		String token = jwtTokenService.generateToken(new UserDetailsImpl(user));
 		emailService.sendVerifyAccountEmail(createUserDto.email(), token);
 	}

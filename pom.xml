@@ -16,6 +16,7 @@
 	<description>Back end da aplicação de gestão de despesas</description>
 	<properties>
 		<java.version>21</java.version>
+		<sendgrid.version>4.10.2</sendgrid.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -99,19 +100,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.google.apis</groupId>
-			<artifactId>google-api-services-gmail</artifactId>
-			<version>v1-rev20240520-2.0.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.google.oauth-client</groupId>
-			<artifactId>google-oauth-client</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.google.api-client</groupId>
-			<artifactId>google-api-client</artifactId>
+			<groupId>com.sendgrid</groupId>
+			<artifactId>sendgrid-java</artifactId>
 		</dependency>
 
 		<dependency>
