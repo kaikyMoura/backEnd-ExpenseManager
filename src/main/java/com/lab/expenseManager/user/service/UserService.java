@@ -132,9 +132,8 @@ public class UserService {
 				.lastName(createUserDto.lastName()).email(createUserDto.email())
 				.password(securityConfig.passwordEncoder().encode(createUserDto.password()))
 				.role(Role.builder().name(RoleName.valueOf(requestRole)).id(role.getId()).build())
-				.status(Status.INACTIVE).userImage(createUserDto.profileImage()).build());
+				.status(Status.INACTIVE).userImage(storageService.uploadFile(createUserDto.profileImage())).build());
 
-		// storageService.uploadFile(createUserDto.profileImage()
 		String token = jwtTokenService.generateToken(new UserDetailsImpl(user));
 		emailService.sendVerifyAccountEmail(createUserDto.email(), token);
 	}
