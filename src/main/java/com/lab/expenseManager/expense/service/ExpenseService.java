@@ -31,8 +31,8 @@ public class ExpenseService {
 	private final CategoryService categoryService;
 	private final SchedulingExpenses schedulingExpenses;
 
-	public ExpenseService(ExpenseRepository expenseRepository, UserService userService,
-			CategoryService categoryService, SchedulingExpenses schedulingExpenses) {
+	public ExpenseService(ExpenseRepository expenseRepository, UserService userService, CategoryService categoryService,
+			SchedulingExpenses schedulingExpenses) {
 		this.expenseRepository = expenseRepository;
 		this.userService = userService;
 		this.categoryService = categoryService;
@@ -96,11 +96,10 @@ public class ExpenseService {
 			expenseRepository.save(Expense.builder().id(UUID.randomUUID()).name(expenseDto.name())
 					.description(expenseDto.description()).category(category).amount(expenseDto.amount())
 					.currency(expenseDto.currency()).isRecurring(expenseDto.isRecurring()).isPaid(expenseDto.isPaid())
-					.attachments(expenseDto.attachments())
-					.priority(expenseDto.priority()).status(schedulingExpenses.determineExpenseStatus(expenseDto.date(), expenseDto.isPaid()))
+					.attachments(expenseDto.attachments()).priority(expenseDto.priority())
+					.status(schedulingExpenses.determineExpenseStatus(expenseDto.date(), expenseDto.isPaid()))
 					.date(expenseDto.date()).user(userService.getUser()).build());
-			
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException("Erro ao executar a operação");
@@ -118,8 +117,13 @@ public class ExpenseService {
 	}
 
 	public void delete(UUID id) {
-		expenseRepository.findById(id)
+		Expense expense = expenseRepository.findById(id)
 				.orElseThrow(() -> new IllegalArgumentException("Nenhuma despesa foi encontrada com este Id."));
+
+		if (expense.getCategory() != null) {
+			expense.setCategory(null);
+		}
+
 		expenseRepository.deleteById(id);
 	}
 
@@ -143,8 +147,7 @@ public class ExpenseService {
 					.save(Expense.builder().name(updateExpenseDto.name()).description(updateExpenseDto.description())
 							.category(category).amount(updateExpenseDto.amount()).currency(updateExpenseDto.currency())
 							.isRecurring(updateExpenseDto.isRecurring()).attachments(updateExpenseDto.attachments())
-							.priority(updateExpenseDto.priority())
-							.date(updateExpenseDto.date()).build());
+							.priority(updateExpenseDto.priority()).date(updateExpenseDto.date()).build());
 
 		} catch (Exception e) {
 			throw new RuntimeException("Erro ao realizar a operação", e.getCause());

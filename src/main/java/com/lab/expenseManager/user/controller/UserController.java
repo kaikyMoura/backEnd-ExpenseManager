@@ -61,7 +61,8 @@ public class UserController {
 	public ResponseEntity<ResponseModel> resendVerifyAccountEmail(@RequestParam("email") String email)
 			throws Exception {
 		userService.resendVerifyAccountEmail(email);
-		return new ResponseEntity<>(new ResponseModel(200, "Um email foi enviado para caixa de entrada do seu e-mail."), HttpStatus.ACCEPTED);
+		return new ResponseEntity<>(new ResponseModel(200, "Um email foi enviado para caixa de entrada do seu e-mail."),
+				HttpStatus.ACCEPTED);
 
 	}
 
@@ -100,21 +101,17 @@ public class UserController {
 
 	@GetMapping("/auth/user")
 	public ResponseEntity<ResponseWithDataModel> getUser() {
-		try {
-			User user = userService.getUser();
+		User user = userService.getUser();
 
-			byte[] imageData = null;
-			if (user.getUserImage() != null) {
-				imageData = storageService.getFile(user.getUserImage());
-			}
-
-			return new ResponseEntity<>(
-					new ResponseWithDataModel(200, "Operação realizada com sucesso.",
-							new RecoveryUserDto(user.getName(), user.getLastName(), user.getEmail(), imageData)),
-					HttpStatus.OK);
-		} catch (Exception exception) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		byte[] imageData = null;
+		if (user.getUserImage() != null) {
+			imageData = storageService.getFile(user.getUserImage());
 		}
+
+		return new ResponseEntity<>(
+				new ResponseWithDataModel(200, "Operação realizada com sucesso.",
+						new RecoveryUserDto(user.getName(), user.getLastName(), user.getEmail(), imageData)),
+				HttpStatus.OK);
 	}
 
 	// Apenas usuários com o role "ADMINISTRATOR" poderão acessar esses endpoints
