@@ -1,12 +1,16 @@
 <h2 align="center">Expense Manager API - Backend</h2>
 <p align="center"><i>Repository for the Expense Manager backend API</i></p>
 
+<div align="center">
+  
 ![GitHub top language](https://img.shields.io/github/languages/top/kaikyMoura/backEnd-ExpenseManager)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/ce1f958181d743b98107dbc70dfac5ed)](https://app.codacy.com/gh/kaikyMoura/backEnd-ExpenseManager/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 ![Repository size](https://img.shields.io/github/repo-size/kaikyMoura/backEnd-ExpenseManager)
 ![Github last commit](https://img.shields.io/github/last-commit/kaikyMoura/backEnd-ExpenseManager)
 ![License](https://img.shields.io/aur/license/LICENSE)
 ![Languages count](https://img.shields.io/github/languages/count/kaikyMoura/backEnd-ExpenseManager)
+
+</div>
 
 <br/>
 
